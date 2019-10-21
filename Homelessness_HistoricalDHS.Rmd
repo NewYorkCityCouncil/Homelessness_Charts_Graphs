@@ -1,0 +1,63 @@
+---
+title: "Interactive Plots for Homelessness: Historical DHS Shelter Census by Mayor (1984-2019)"
+author: "Melissa Nunez"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, fig.align="left")
+```
+
+
+```{r Data}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(tidyr)
+library(janitor)
+library(scales)
+
+dhs.los <- read_excel("Data/DHS_Length of Stay.xlsx") %>% clean_names()
+dhs.hist <- read_excel("Data/Historical_DHS_Counts.xlsx") %>% clean_names()
+dhs.hist <- dhs.hist %>% drop_na() 
+
+red <- "#b50905"
+pink <- "#ff5757"
+blue <- "#4b626e"
+bg <- "#e6dcca"
+```
+
+
+
+```{r Historical Counts Data Cleaning}
+dhs.hist <- separate(dhs.hist, date, c("Year", "Month", "Day"), sep = "-", remove = FALSE)
+dhs.hist <- dhs.hist %>% filter(Month %in% c("01","04","07","10"))
+dhs.hist$Month <- factor(dhs.hist$Month)
+levels(dhs.hist$Month) <- c("Jan", "Apr", "Jul", "Oct")
+dhs.hist$xlabs <- paste(dhs.hist$Month, dhs.hist$Day, dhs.hist$Year, sep="-")
+dhs.hist$date <- as.Date(dhs.hist$date)
+dates.str <- c(dhs.hist[seq(1,139,by=3),"date"])[[1]] %>%
+gsub(pattern=" UTC",replacement="",fixed=T)
+```
+
+
+```{r Historical Counts Plots}
+plot_ly(dhs.hist, x=~date, y=~total_population, type="scatter", mode = "lines+markers", hoverinfo = "text", text = ~paste("Date:", xlabs, "<br>", "Population:", round(total_population,0)), color = I(blue)) %>%
+  layout(xaxis=list(type="date", tickformat = "%b-%Y", tickvals=~dates.str, tickfont = list(size=10), title = "Date", tickangle=315), yaxis = list(title = "Population"), title = "Historical DHS Shelter Census by Mayor (1984-2019)", autosize = F, width = 1000, height = 500) %>%
+  add_segments(x = c("1989-10-01"), xend = c("1989-10-01"), y = min(dhs.hist$total_population), yend=max(dhs.hist$total_population)+2000, color = I(red), showlegend = FALSE, line = list(dash = "dot", width=1)) %>%
+  add_segments(x = c("1993-10-01"), xend = c("1993-10-01"), y = min(dhs.hist$total_population), yend=max(dhs.hist$total_population)+2000, color = I(red), showlegend = FALSE, line = list(dash = "dot", width=1)) %>%
+  add_segments(x = c("2001-10-01"), xend = c("2001-10-01"), y = min(dhs.hist$total_population), yend=max(dhs.hist$total_population)+2000, color = I(red), showlegend = FALSE, line = list(dash = "dot", width=1)) %>%
+  add_segments(x = c("2013-01-01"), xend = c("2013-01-01"), y = min(dhs.hist$total_population), yend=max(dhs.hist$total_population)+2000, color = I(red), showlegend = FALSE, line = list(dash = "dot", width=1)) %>% 
+  add_annotations(x="1986-07-01", y=max(dhs.hist$total_population)+7500, text=paste("KOCH", "<br>", "(1978-1989)", "<br>", "Temporary"), showarrow=F, font = list(color = blue, size = 12)) %>% 
+  add_annotations(x="1991-10-01", y=max(dhs.hist$total_population)+7500, text=paste("DINKINS", "<br>", "(1990-1993)", "<br>", "Housing"), showarrow=F, font = list(color = blue, size = 12)) %>% 
+  add_annotations(x="1997-10-01", y=max(dhs.hist$total_population)+7500, text=paste("GIULIANI", "<br>", "(1994-2001)", "<br>", "Punitive"), showarrow=F, font = list(color = blue, size = 12)) %>% 
+  add_annotations(x="2007-04-01", y=max(dhs.hist$total_population)+7500, text=paste("BLOOMBERG", "<br>", "(2002-2013)", "<br>", "Reduce Incentives"), showarrow=F, font = list(color = blue, size = 12)) %>% 
+  add_annotations(x="2016-01-01", y=max(dhs.hist$total_population)+7500, text=paste("DE BLASIO", "<br>", "(2014-Present)", "<br>", "Managed Reality"), showarrow=F, font = list(color = blue, size = 12)) 
+```
+
+
+
+

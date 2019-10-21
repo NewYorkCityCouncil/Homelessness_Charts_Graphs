@@ -1,0 +1,41 @@
+---
+title: "Interactive Plots for Homelessness: DHS Length of Stay by Family Type From 2008-2018"
+author: "Melissa Nunez"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, fig.align="left")
+```
+
+
+```{r Data}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(tidyr)
+library(janitor)
+library(scales)
+
+dhs.los <- read_excel("Data/DHS_Length of Stay.xlsx") %>% clean_names()
+dhs.hist <- read_excel("Data/Historical_DHS_Counts.xlsx") %>% clean_names()
+dhs.hist <- dhs.hist %>% drop_na() 
+
+red <- "#b50905"
+pink <- "#ff5757"
+blue <- "#4b626e"
+bg <- "#e6dcca"
+```
+
+
+```{r Length of Stay Plots}
+plot_ly(dhs.los, x=~factor(dhs_mmr), y=~adult_fam, name = 'Adult Family', type="scatter", mode="lines+markers", hoverinfo="text", text=~paste(adult_fam, "Days"), color = I(red)) %>% add_trace(y=~fam_w_child, name = 'Families With Children', mode="lines+markers", hoverinfo="text", text=~paste(fam_w_child, "Days"), color = I(pink)) %>% add_trace(y=~single_adults, name = "Single Adults", mode="lines+markers", hoverinfo="text", text=~paste(single_adults, "Days"), color = I(blue)) %>%
+  layout(xaxis = list(title="Year"),
+         yaxis = list(title="Average Number of Days"),
+         title="DHS Length of Stay by Family Type From 2008-2018", autosize = F, width = 1000, height = 500)
+```
+
+
