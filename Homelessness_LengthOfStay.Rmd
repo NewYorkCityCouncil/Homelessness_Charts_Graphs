@@ -1,7 +1,4 @@
 ---
-title: "Interactive Plots for Homelessness: DHS Length of Stay by Family Type From 2008-2018"
-author: "Melissa Nunez"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: html_document
 ---
 
