@@ -21,8 +21,6 @@ library(janitor)
 library(scales)
 
 dhs.los <- read_excel("Data/DHS_Length of Stay.xlsx") %>% clean_names()
-dhs.hist <- read_excel("Data/Historical_DHS_Counts.xlsx") %>% clean_names()
-dhs.hist <- dhs.hist %>% drop_na() 
 
 red <- "#b50905"
 pink <- "#ff5757"
